@@ -46,7 +46,7 @@ Investigate the codebase to identify and fix performance bottlenecks. The applic
 - Asynchronous vs synchronous operations
 - Database optimization techniques
 
-Document all performance issues you find and the solutions you implement in your `SOLUTION.md` file.
+Document all performance issues you find and the solutions you implement in your [`SOLUTION.md`](SOLUTION.md) file.
 
 ## Part 2: Implement New Feature
 
@@ -136,7 +136,7 @@ Implement a comprehensive activity logging system that tracks all changes made t
 
 1. Fix all performance issues identified in Part 1
 2. Implement the new feature as specified in Part 2
-3. Include a `SOLUTION.md` file explaining:
+3. Include a [`SOLUTION.md`](SOLUTION.md) file explaining:
    - Your approach to fixing each performance issue
    - Your implementation strategy for the activity log
    - Any trade-offs or assumptions made

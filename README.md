@@ -1,5 +1,7 @@
 # Task Management API - Take-Home Assignment
 
+> Description of your take-home assignment can be found in [`TASK_DESCRIPTION.md`](TASK_DESCRIPTION.md).
+
 ## Quick Start
 
 1. Install dependencies:
