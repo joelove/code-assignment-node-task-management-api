@@ -138,6 +138,67 @@ describe("TasksController (e2e)", () => {
         expect(td).toBeLessThanOrEqual(new Date(endDate).getTime());
       });
     });
+
+    it("creates a task with assignee", async () => {
+      const usersRes = await request(app.getHttpServer())
+        .get("/users")
+        .expect(200);
+      const assigneeId = usersRes.body[0].id;
+      const projectId = response.body[0].projectId;
+
+      const payload = {
+        title: "E2E Create with assignee",
+        description: "Ensures create returns relations without blocking",
+        status: TaskStatus.TODO,
+        priority: TaskPriority.MEDIUM,
+        projectId,
+        assigneeId,
+      };
+
+      const res = await request(app.getHttpServer())
+        .post("/tasks")
+        .send(payload)
+        .expect(201);
+
+      expect(res.body).toHaveProperty("id");
+      expect(res.body).toHaveProperty("assignee");
+      expect(res.body.assignee.id).toBe(assigneeId);
+      expect(res.body).toHaveProperty("project");
+      expect(res.body.project.id).toBe(projectId);
+      expect(Array.isArray(res.body.tags)).toBe(true);
+    });
+
+    it("updates a task assignment", async () => {
+      const usersRes = await request(app.getHttpServer())
+        .get("/users")
+        .expect(200);
+      const assigneeId = usersRes.body[0].id;
+      const projectId = response.body[0].projectId;
+
+      const created = await request(app.getHttpServer())
+        .post("/tasks")
+        .send({
+          title: "E2E Update assignment (seed)",
+          description: "Create without assignee",
+          status: TaskStatus.TODO,
+          priority: TaskPriority.LOW,
+          projectId,
+        })
+        .expect(201);
+
+      const taskId = created.body.id;
+
+      const updated = await request(app.getHttpServer())
+        .put(`/tasks/${taskId}`)
+        .send({ assigneeId })
+        .expect(200);
+
+      expect(updated.body).toHaveProperty("id", taskId);
+      expect(updated.body).toHaveProperty("assignee");
+      expect(updated.body.assignee.id).toBe(assigneeId);
+      expect(updated.body).toHaveProperty("project");
+      expect(Array.isArray(updated.body.tags)).toBe(true);
+    });
   });
 
   describe("/tasks/:id", () => {
