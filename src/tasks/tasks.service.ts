@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from "../prisma/prisma.service";
+import { PrismaService } from '../prisma/prisma.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -49,7 +49,7 @@ export class TasksService {
         project: true,
         tags: true,
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
     });
 
     return tasks;
@@ -141,6 +141,6 @@ export class TasksService {
       where: { id },
     });
 
-    return { message: "Task deleted successfully" };
+    return { message: 'Task deleted successfully' };
   }
 }
