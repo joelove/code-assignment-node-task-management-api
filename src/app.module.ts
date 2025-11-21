@@ -4,8 +4,8 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { PrismaModule } from './prisma/prisma.module';
 import { TasksModule } from './tasks/tasks.module';
 import { ProjectsModule } from './projects/projects.module';
-import { UsersModule } from './users/users.module';
-import { EmailModule } from './email/email.module';
+import { UsersModule } from "./users/users.module";
+import { EmailQueueModule } from './email/email.queue.module';
 import { redisStore } from 'cache-manager-redis-yet';
 
 @Module({
@@ -19,14 +19,14 @@ import { redisStore } from 'cache-manager-redis-yet';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
         // Use in-memory cache during tests
-        if (process.env.NODE_ENV === 'test') return {};
+        if (process.env.NODE_ENV === "test") return {};
 
         const url = configService.get<string>("REDIS_URL") ?? "";
         return {
           store: await redisStore({
             url: url,
             socket: {
-              tls: url?.startsWith('rediss://') ? true : false,
+              tls: url?.startsWith("rediss://") ? true : false,
               rejectUnauthorized: false,
             },
             pingInterval: 5 * 1000,
@@ -38,7 +38,7 @@ import { redisStore } from 'cache-manager-redis-yet';
     TasksModule,
     ProjectsModule,
     UsersModule,
-    EmailModule,
+    EmailQueueModule,
   ],
 })
 export class AppModule {}

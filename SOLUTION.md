@@ -22,9 +22,13 @@ First, I want to get a benchmark for each of the issues by writing some perfoman
 
 1. The `TasksService.findAll` method loads all tasks, then performs N+1 queries to fetch related `assignee`, `project`, and `tags` for each task, then applies filters in memory. This causes response times to scale linearly with the number of tasks and creates heavy DB load.
 
+2. The email service task assignment notification is blocking and causes the request to hang for two seconds.
+
 **Solution Implemented:**
 
 1. Refactored TasksService.findAll to push all filtering into the database and fetch relations in a single call, eliminating the N+1 pattern and in-memory filtering. It now builds a Prisma where object from TaskFilterDto and calls prisma.task.findMany({ where, include: { assignee, project, tags }, orderBy: { createdAt: 'desc' } }).
+
+2. Initially replaced the awaited service call with an ad-hoc child-process worker. But pivoted to use a more-idiomatic NestJS BullMQ (Redis) queue and processor; TasksService now enqueues email jobs so requests return immediately while EmailService runs unchanged in the background.
 
 **Performance Impact:**
 [Describe the improvement]

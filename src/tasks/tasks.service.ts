@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { EmailService } from '../email/email.service';
+import { PrismaService } from "../prisma/prisma.service";
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskFilterDto } from './dto/task-filter.dto';
@@ -10,7 +11,7 @@ import { Task, Prisma } from '@prisma/client';
 export class TasksService {
   constructor(
     private prisma: PrismaService,
-    private emailService: EmailService,
+    @InjectQueue('email') private readonly emailQueue: Queue,
   ) {}
 
   async findAll(filterDto: TaskFilterDto) {
@@ -34,7 +35,9 @@ export class TasksService {
 
     if (filterDto.dueDateFrom || filterDto.dueDateTo) {
       where.dueDate = {
-        gte: filterDto.dueDateFrom ? new Date(filterDto.dueDateFrom) : undefined,
+        gte: filterDto.dueDateFrom
+          ? new Date(filterDto.dueDateFrom)
+          : undefined,
         lte: filterDto.dueDateTo ? new Date(filterDto.dueDateTo) : undefined,
       };
     }
@@ -46,7 +49,7 @@ export class TasksService {
         project: true,
         tags: true,
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     return tasks;
@@ -82,7 +85,7 @@ export class TasksService {
           ? { connect: { id: createTaskDto.assigneeId } }
           : undefined,
         tags: createTaskDto.tagIds
-          ? { connect: createTaskDto.tagIds.map(id => ({ id })) }
+          ? { connect: createTaskDto.tagIds.map((id) => ({ id })) }
           : undefined,
       },
       include: {
@@ -92,11 +95,7 @@ export class TasksService {
       },
     });
 
-    if (task.assignee) {
-      this.emailService
-        .sendTaskAssignmentNotification(task.assignee.email, task.title)
-        .catch(() => {});
-    }
+    if (task.assignee) await this.emailQueue.add('taskAssignment', { assigneeEmail: task.assignee.email, taskTitle: task.title }, { removeOnComplete: true, removeOnFail: true });
 
     return task;
   }
@@ -112,13 +111,14 @@ export class TasksService {
         status: updateTaskDto.status,
         priority: updateTaskDto.priority,
         dueDate: updateTaskDto.dueDate,
-        assignee: updateTaskDto.assigneeId !== undefined
-          ? updateTaskDto.assigneeId
-            ? { connect: { id: updateTaskDto.assigneeId } }
-            : { disconnect: true }
-          : undefined,
+        assignee:
+          updateTaskDto.assigneeId !== undefined
+            ? updateTaskDto.assigneeId
+              ? { connect: { id: updateTaskDto.assigneeId } }
+              : { disconnect: true }
+            : undefined,
         tags: updateTaskDto.tagIds
-          ? { set: updateTaskDto.tagIds.map(id => ({ id })) }
+          ? { set: updateTaskDto.tagIds.map((id) => ({ id })) }
           : undefined,
       },
       include: {
@@ -128,11 +128,8 @@ export class TasksService {
       },
     });
 
-    if (updateTaskDto.assigneeId && updateTaskDto.assigneeId !== existingTask.assigneeId) {
-      this.emailService
-        .sendTaskAssignmentNotification(task.assignee!.email, task.title)
-        .catch(() => {});
-    }
+    if (updateTaskDto.assigneeId && updateTaskDto.assigneeId !== existingTask.assigneeId)
+      await this.emailQueue.add('taskAssignment', { assigneeEmail: task.assignee!.email, taskTitle: task.title }, { removeOnComplete: true, removeOnFail: true });
 
     return task;
   }
@@ -144,6 +141,6 @@ export class TasksService {
       where: { id },
     });
 
-    return { message: 'Task deleted successfully' };
+    return { message: "Task deleted successfully" };
   }
 }
