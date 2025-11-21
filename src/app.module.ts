@@ -5,8 +5,9 @@ import { PrismaModule } from './prisma/prisma.module';
 import { TasksModule } from './tasks/tasks.module';
 import { ProjectsModule } from './projects/projects.module';
 import { UsersModule } from './users/users.module';
-import { EmailModule } from './email/email.module';
+import { EmailQueueModule } from './email/email.queue.module';
 import { redisStore } from 'cache-manager-redis-yet';
+import { CacheCleanupService } from "./cache/cache-cleanup.service";
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { redisStore } from 'cache-manager-redis-yet';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
-        const url = configService.get<string>('REDIS_URL') ?? ''
+        const url = configService.get<string>('REDIS_URL') ?? '';
+
         return {
           store: await redisStore({
             url: url,
@@ -27,15 +29,16 @@ import { redisStore } from 'cache-manager-redis-yet';
               rejectUnauthorized: false,
             },
             pingInterval: 5 * 1000,
-          })
-        }
+          }),
+        };
       },
     }),
     PrismaModule,
     TasksModule,
     ProjectsModule,
     UsersModule,
-    EmailModule,
+    EmailQueueModule,
   ],
+  providers: [CacheCleanupService],
 })
 export class AppModule {}
