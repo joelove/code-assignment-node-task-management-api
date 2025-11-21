@@ -40,4 +40,4 @@ lerna-debug.log*
 # Prisma
 prisma/migrations
 
-test/*.perf-baseline.json
+test/*.perf.json

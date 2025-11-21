@@ -93,10 +93,9 @@ export class TasksService {
     });
 
     if (task.assignee) {
-      await this.emailService.sendTaskAssignmentNotification(
-        task.assignee.email,
-        task.title
-      );
+      this.emailService
+        .sendTaskAssignmentNotification(task.assignee.email, task.title)
+        .catch(() => {});
     }
 
     return task;
@@ -130,10 +129,9 @@ export class TasksService {
     });
 
     if (updateTaskDto.assigneeId && updateTaskDto.assigneeId !== existingTask.assigneeId) {
-      await this.emailService.sendTaskAssignmentNotification(
-        task.assignee!.email,
-        task.title
-      );
+      this.emailService
+        .sendTaskAssignmentNotification(task.assignee!.email, task.title)
+        .catch(() => {});
     }
 
     return task;
