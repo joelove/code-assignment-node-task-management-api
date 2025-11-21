@@ -19,14 +19,14 @@ import { redisStore } from 'cache-manager-redis-yet';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
         // Use in-memory cache during tests
-        if (process.env.NODE_ENV === "test") return {};
+        if (process.env.NODE_ENV === 'test') return {};
 
-        const url = configService.get<string>("REDIS_URL") ?? "";
+        const url = configService.get<string>('REDIS_URL') ?? ';
         return {
           store: await redisStore({
             url: url,
             socket: {
-              tls: url?.startsWith("rediss://") ? true : false,
+              tls: url?.startsWith('rediss://') ? true : false,
               rejectUnauthorized: false,
             },
             pingInterval: 5 * 1000,
