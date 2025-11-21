@@ -134,6 +134,7 @@ describe("TasksController (e2e)", () => {
 
       res.body.forEach((t: any) => {
         const td = new Date(t.dueDate).getTime();
+
         expect(td).toBeGreaterThanOrEqual(new Date(startDate).getTime());
         expect(td).toBeLessThanOrEqual(new Date(endDate).getTime());
       });
@@ -143,6 +144,7 @@ describe("TasksController (e2e)", () => {
       const usersRes = await request(app.getHttpServer())
         .get("/users")
         .expect(200);
+
       const assigneeId = usersRes.body[0].id;
       const projectId = response.body[0].projectId;
 
@@ -172,6 +174,7 @@ describe("TasksController (e2e)", () => {
       const usersRes = await request(app.getHttpServer())
         .get("/users")
         .expect(200);
+
       const assigneeId = usersRes.body[0].id;
       const projectId = response.body[0].projectId;
 

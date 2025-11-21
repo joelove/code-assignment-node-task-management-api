@@ -21,7 +21,7 @@ import { redisStore } from 'cache-manager-redis-yet';
         // Use in-memory cache during tests
         if (process.env.NODE_ENV === 'test') return {};
 
-        const url = configService.get<string>('REDIS_URL') ?? ';
+        const url = configService.get<string>("REDIS_URL") ?? "";
         return {
           store: await redisStore({
             url: url,

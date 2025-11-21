@@ -9,7 +9,6 @@ import * as path from "path";
 describe("TasksController (Performance)", () => {
   let app: INestApplication;
   let prisma: PrismaClient;
-  let originalConsoleLog: (...args: any[]) => void;
 
   const now = () => Date.now();
   const msSince = (start: number) => Date.now() - start;
@@ -155,9 +154,11 @@ describe("TasksController (Performance)", () => {
       const ok = settled.filter(
         (r) => r.status === "fulfilled"
       ) as PromiseFulfilledResult<request.Response>[];
+
       expect(ok.length).toBeGreaterThan(0);
 
       baseline["get_all_concurrent5_total_ms"] = msSince(start);
+
       ok.forEach((r) => expect(Array.isArray(r.value.body)).toBe(true));
     });
 
@@ -249,7 +250,9 @@ describe("TasksController (Performance)", () => {
       const ok = settled.filter(
         (r) => r.status === "fulfilled"
       ) as PromiseFulfilledResult<request.Response>[];
+
       expect(ok.length).toBeGreaterThan(0);
+
       ok.forEach((r) => expect(Array.isArray(r.value.body)).toBe(true));
 
       expect(totalMs).toBeLessThan(1000);
@@ -294,6 +297,7 @@ describe("TasksController (Performance)", () => {
       const startDate = new Date(
         Date.now() - 7 * 24 * 60 * 60 * 1000
       ).toISOString();
+
       const endDate = new Date(
         Date.now() + 14 * 24 * 60 * 60 * 1000
       ).toISOString();
