@@ -95,7 +95,17 @@ export class TasksService {
       },
     });
 
-    if (task.assignee) await this.emailQueue.add('taskAssignment', { assigneeEmail: task.assignee.email, taskTitle: task.title }, { removeOnComplete: true, removeOnFail: true });
+    if (task.assignee) {
+      const queueData = {
+        assigneeEmail: task.assignee.email,
+        taskTitle: task.title,
+      };
+
+      await this.emailQueue.add("taskAssignment", queueData, {
+        removeOnComplete: true,
+        removeOnFail: true,
+      });
+    }
 
     return task;
   }
@@ -128,8 +138,20 @@ export class TasksService {
       },
     });
 
-    if (updateTaskDto.assigneeId && updateTaskDto.assigneeId !== existingTask.assigneeId)
-      await this.emailQueue.add('taskAssignment', { assigneeEmail: task.assignee!.email, taskTitle: task.title }, { removeOnComplete: true, removeOnFail: true });
+    if (
+      updateTaskDto.assigneeId &&
+      updateTaskDto.assigneeId !== existingTask.assigneeId
+    ) {
+      const queueData = {
+        assigneeEmail: task.assignee!.email,
+        taskTitle: task.title,
+      };
+
+      await this.emailQueue.add("taskAssignment", queueData, {
+        removeOnComplete: true,
+        removeOnFail: true,
+      });
+    }
 
     return task;
   }
