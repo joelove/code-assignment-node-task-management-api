@@ -19,10 +19,12 @@ Search performance degrading adds weight to the in-memory filtering theory but c
 First, I want to get a benchmark for each of the issues by writing some perfomance tests. While I'm there, I'll add some extra coverage if it needs it (just to help me avoid causing any subtle behaviour changes during refactoring).
 
 **Problem Identified:**
-[Describe the problem you found]
+
+1. The `TasksService.findAll` method loads all tasks, then performs N+1 queries to fetch related `assignee`, `project`, and `tags` for each task, then applies filters in memory. This causes response times to scale linearly with the number of tasks and creates heavy DB load.
 
 **Solution Implemented:**
-[Describe your fix]
+
+1. Refactored TasksService.findAll to push all filtering into the database and fetch relations in a single call, eliminating the N+1 pattern and in-memory filtering. It now builds a Prisma where object from TaskFilterDto and calls prisma.task.findMany({ where, include: { assignee, project, tags }, orderBy: { createdAt: 'desc' } }).
 
 **Performance Impact:**
 [Describe the improvement]

@@ -14,71 +14,42 @@ export class TasksService {
   ) {}
 
   async findAll(filterDto: TaskFilterDto) {
-    const tasks = await this.prisma.task.findMany();
-
-    const tasksWithRelations = await Promise.all(
-      tasks.map(async (task) => {
-        const assignee = task.assigneeId
-          ? await this.prisma.user.findUnique({ where: { id: task.assigneeId } })
-          : null;
-
-        const project = await this.prisma.project.findUnique({
-          where: { id: task.projectId }
-        });
-
-        const tags = await this.prisma.tag.findMany({
-          where: {
-            tasks: {
-              some: { id: task.id }
-            }
-          }
-        });
-
-        return {
-          ...task,
-          assignee,
-          project,
-          tags,
-        };
-      })
-    );
-
-    let filteredTasks = tasksWithRelations;
+    const where: Prisma.TaskWhereInput = {};
 
     if (filterDto.status) {
-      filteredTasks = filteredTasks.filter(task => task.status === filterDto.status);
+      where.status = filterDto.status;
     }
 
     if (filterDto.priority) {
-      filteredTasks = filteredTasks.filter(task => task.priority === filterDto.priority);
+      where.priority = filterDto.priority;
     }
 
     if (filterDto.assigneeId) {
-      filteredTasks = filteredTasks.filter(task => task.assigneeId === filterDto.assigneeId);
+      where.assigneeId = filterDto.assigneeId;
     }
 
     if (filterDto.projectId) {
-      filteredTasks = filteredTasks.filter(task => task.projectId === filterDto.projectId);
+      where.projectId = filterDto.projectId;
     }
 
     if (filterDto.dueDateFrom || filterDto.dueDateTo) {
-      filteredTasks = filteredTasks.filter(task => {
-        if (!task.dueDate) return false;
-        const dueDate = new Date(task.dueDate);
-
-        if (filterDto.dueDateFrom && dueDate < new Date(filterDto.dueDateFrom)) {
-          return false;
-        }
-
-        if (filterDto.dueDateTo && dueDate > new Date(filterDto.dueDateTo)) {
-          return false;
-        }
-
-        return true;
-      });
+      where.dueDate = {
+        gte: filterDto.dueDateFrom ? new Date(filterDto.dueDateFrom) : undefined,
+        lte: filterDto.dueDateTo ? new Date(filterDto.dueDateTo) : undefined,
+      };
     }
 
-    return filteredTasks;
+    const tasks = await this.prisma.task.findMany({
+      where,
+      include: {
+        assignee: true,
+        project: true,
+        tags: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return tasks;
   }
 
   async findOne(id: string) {
