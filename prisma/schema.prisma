@@ -38,11 +38,19 @@ model Task {
 
   projectId   String
   project     Project  @relation(fields: [projectId], references: [id])
-  
+
   assigneeId  String?
   assignee    User?    @relation(fields: [assigneeId], references: [id])
 
   tags        Tag[]
+
+  @@index([projectId])
+  @@index([assigneeId])
+  @@index([status])
+  @@index([priority])
+  @@index([dueDate])
+  @@index([createdAt(sort: Desc)])
+  @@index([projectId, createdAt(sort: Desc)])
 }
 
 model Tag {

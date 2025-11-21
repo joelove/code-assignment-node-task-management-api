@@ -44,12 +44,22 @@ export class TasksService {
 
     const tasks = await this.prisma.task.findMany({
       where,
-      include: {
-        assignee: true,
-        project: true,
-        tags: true,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        status: true,
+        priority: true,
+        dueDate: true,
+        createdAt: true,
+        updatedAt: true,
+        projectId: true,
+        assigneeId: true,
+        assignee: { select: { id: true, email: true, name: true } },
+        project: { select: { id: true, name: true } },
+        tags: { select: { id: true, name: true } },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     return tasks;
@@ -58,10 +68,20 @@ export class TasksService {
   async findOne(id: string) {
     const task = await this.prisma.task.findUnique({
       where: { id },
-      include: {
-        assignee: true,
-        project: true,
-        tags: true,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        status: true,
+        priority: true,
+        dueDate: true,
+        createdAt: true,
+        updatedAt: true,
+        projectId: true,
+        assigneeId: true,
+        assignee: { select: { id: true, email: true, name: true } },
+        project: { select: { id: true, name: true } },
+        tags: { select: { id: true, name: true } },
       },
     });
 
@@ -88,10 +108,20 @@ export class TasksService {
           ? { connect: createTaskDto.tagIds.map(id => ({ id })) }
           : undefined,
       },
-      include: {
-        assignee: true,
-        project: true,
-        tags: true,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        status: true,
+        priority: true,
+        dueDate: true,
+        createdAt: true,
+        updatedAt: true,
+        projectId: true,
+        assigneeId: true,
+        assignee: { select: { id: true, email: true, name: true } },
+        project: { select: { id: true, name: true } },
+        tags: { select: { id: true, name: true } },
       },
     });
 
@@ -131,10 +161,20 @@ export class TasksService {
           ? { set: updateTaskDto.tagIds.map(id => ({ id })) }
           : undefined,
       },
-      include: {
-        assignee: true,
-        project: true,
-        tags: true,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        status: true,
+        priority: true,
+        dueDate: true,
+        createdAt: true,
+        updatedAt: true,
+        projectId: true,
+        assigneeId: true,
+        assignee: { select: { id: true, email: true, name: true } },
+        project: { select: { id: true, name: true } },
+        tags: { select: { id: true, name: true } },
       },
     });
 

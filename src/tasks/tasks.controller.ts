@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, Query } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Query, UseInterceptors } from '@nestjs/common';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -9,6 +10,8 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Get()
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(10)
   findAll(@Query() filterDto: TaskFilterDto) {
     return this.tasksService.findAll(filterDto);
   }
