@@ -7,6 +7,7 @@ import { ProjectsModule } from './projects/projects.module';
 import { UsersModule } from './users/users.module';
 import { EmailQueueModule } from './email/email.queue.module';
 import { redisStore } from 'cache-manager-redis-yet';
+import { CacheCleanupService } from "./cache/cache-cleanup.service";
 
 @Module({
   imports: [
@@ -18,10 +19,8 @@ import { redisStore } from 'cache-manager-redis-yet';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
-        // Use in-memory cache during tests
-        if (process.env.NODE_ENV === 'test') return {};
-
         const url = configService.get<string>('REDIS_URL') ?? '';
+
         return {
           store: await redisStore({
             url: url,
@@ -40,5 +39,6 @@ import { redisStore } from 'cache-manager-redis-yet';
     UsersModule,
     EmailQueueModule,
   ],
+  providers: [CacheCleanupService],
 })
 export class AppModule {}
