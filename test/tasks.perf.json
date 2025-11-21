@@ -1,0 +1,10 @@
+{
+  "capturedAt": "2025-11-21T12:20:12.057Z",
+  "metrics": {
+    "get_all_1000_ms": 234,
+    "get_all_1000_concurrent5_total_ms": 630,
+    "post_with_assignee_ms": 2025,
+    "filter_status_completed_ms": 210,
+    "filter_assignee_and_date_ms": 171
+  }
+}
