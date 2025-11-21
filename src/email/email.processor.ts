@@ -10,8 +10,10 @@ export class EmailProcessor extends WorkerHost {
 
   async process(job: Job): Promise<void> {
     if (job.name === 'taskAssignment') {
-      const { assigneeEmail, taskTitle } = job.data as { assigneeEmail: string; taskTitle: string };
-      await this.emailService.sendTaskAssignmentNotification(assigneeEmail, taskTitle);
+      await this.emailService.sendTaskAssignmentNotification(
+        job.data.assigneeEmail,
+        job.data.taskTitle
+      );
       return;
     }
   }

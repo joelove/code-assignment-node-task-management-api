@@ -11,7 +11,7 @@ import { Task, Prisma } from '@prisma/client';
 export class TasksService {
   constructor(
     private prisma: PrismaService,
-    @InjectQueue('email') private readonly emailQueue: Queue,
+    @InjectQueue('email') private readonly emailQueue: Queue
   ) {}
 
   async findAll(filterDto: TaskFilterDto) {
@@ -85,7 +85,7 @@ export class TasksService {
           ? { connect: { id: createTaskDto.assigneeId } }
           : undefined,
         tags: createTaskDto.tagIds
-          ? { connect: createTaskDto.tagIds.map((id) => ({ id })) }
+          ? { connect: createTaskDto.tagIds.map(id => ({ id })) }
           : undefined,
       },
       include: {
@@ -101,7 +101,7 @@ export class TasksService {
         taskTitle: task.title,
       };
 
-      await this.emailQueue.add("taskAssignment", queueData, {
+      await this.emailQueue.add('taskAssignment', queueData, {
         removeOnComplete: true,
         removeOnFail: true,
       });
@@ -128,7 +128,7 @@ export class TasksService {
               : { disconnect: true }
             : undefined,
         tags: updateTaskDto.tagIds
-          ? { set: updateTaskDto.tagIds.map((id) => ({ id })) }
+          ? { set: updateTaskDto.tagIds.map(id => ({ id })) }
           : undefined,
       },
       include: {
@@ -147,7 +147,7 @@ export class TasksService {
         taskTitle: task.title,
       };
 
-      await this.emailQueue.add("taskAssignment", queueData, {
+      await this.emailQueue.add('taskAssignment', queueData, {
         removeOnComplete: true,
         removeOnFail: true,
       });

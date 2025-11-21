@@ -220,7 +220,6 @@ describe("TasksController (Performance)", () => {
     });
 
     afterAll(() => {
-      // Final save to ensure metrics are persisted
       saveBaseline();
     });
   });
