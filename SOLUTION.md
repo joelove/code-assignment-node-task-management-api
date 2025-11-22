@@ -26,6 +26,8 @@ First, I want to get a benchmark for each of the issues by writing some perfoman
 
 3. The email service task assignment notification is blocking and causes the request to hang for two seconds.
 
+4. Database query efficiency has room for improvement. Lack of indexes causes slow filter lookups and use of include over select could cause some unnecesary computation.
+
 **Solution Implemented:**
 
 1. Refactored TasksService.findAll to push all filtering into the database and fetch relations in a single call, eliminating the N+1 pattern and in-memory filtering. It now builds a Prisma where object from TaskFilterDto and calls prisma.task.findMany({ where, include: { assignee, project, tags }, orderBy: { createdAt: 'desc' } }).
@@ -33,6 +35,8 @@ First, I want to get a benchmark for each of the issues by writing some perfoman
 2. Replaced the individual queries for each of assignee, project, tags with a single where/include to decrease database load and speed up request turnaround.
 
 3. Initially replaced the awaited service call with an ad-hoc child-process worker. But pivoted to use a more-idiomatic NestJS BullMQ (Redis) queue and processor; TasksService now enqueues email jobs so requests return immediately while EmailService runs unchanged in the background.
+
+4. Added indexes for each of the queryable fields. Add cache interceptor to findAll query. Replace include with select for marginal query speed gains in higher volume queries.
 
 **Performance Impact:**
 
@@ -51,6 +55,11 @@ After refactoring the TaskService and creating a queue to run the email service 
 - **Post task with assignee:** 16ms
 - **Filter tasks by status completed**: 52ms
 - **Filter assignee and date**: 19ms
+
+Next, I increased the seeded dataset in the performance test to 20,000 tasks and compared results before and after each query optimisation. By adding indexed, a cache interceptor and refactoring the query to use select over include, the performance improved with large get all tasks queries by 20-25%:
+
+- **Get all tasks:** 544ms -> 437ms
+- **Get all tasks (5 concurrent requests):** 1688ms -> 1280ms
 
 ## Part 2: Activity Log Feature
 

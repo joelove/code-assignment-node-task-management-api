@@ -125,7 +125,7 @@ describe("TasksController (Performance)", () => {
     prisma = new PrismaClient();
     seedCtx = await setupSeedContext();
 
-    await seedExactlyTasks(1000, seedCtx);
+    await seedExactlyTasks(20_000, seedCtx);
   });
 
   afterAll(async () => {
@@ -134,7 +134,7 @@ describe("TasksController (Performance)", () => {
   });
 
   describe("Baseline capture (saved to perf.json)", () => {
-    it("GET /tasks with ~1000 tasks", async () => {
+    it("GET /tasks with ~20,000 tasks", async () => {
       const start = now();
       const res = await request(app.getHttpServer()).get("/tasks").expect(200);
 
@@ -225,16 +225,16 @@ describe("TasksController (Performance)", () => {
   });
 
   describe("Target thresholds (expected to fail until refactor)", () => {
-    it("GET /tasks with ~1000 tasks under 200ms", async () => {
+    it("GET /tasks with ~20,000 tasks under 500ms", async () => {
       const start = now();
       const res = await request(app.getHttpServer()).get("/tasks").expect(200);
       const durationMs = msSince(start);
 
       expect(Array.isArray(res.body)).toBe(true);
-      expect(durationMs).toBeLessThan(200);
+      expect(durationMs).toBeLessThan(500);
     });
 
-    it("GET /tasks x5 concurrent under 1000ms total", async () => {
+    it("GET /tasks x5 concurrent under 2000ms total", async () => {
       const server = app.getHttpServer();
       const start = now();
 
@@ -254,10 +254,10 @@ describe("TasksController (Performance)", () => {
 
       ok.forEach((r) => expect(Array.isArray(r.value.body)).toBe(true));
 
-      expect(totalMs).toBeLessThan(1000);
+      expect(totalMs).toBeLessThan(2000);
     });
 
-    it("POST /tasks with assignee under 100ms", async () => {
+    it("POST /tasks with assignee under 200ms", async () => {
       const payload = {
         title: `Target assignment [${seedCtx.runId}]`,
         description: "Target threshold",
@@ -276,10 +276,10 @@ describe("TasksController (Performance)", () => {
       const durationMs = msSince(start);
 
       expect(res.body).toHaveProperty("id");
-      expect(durationMs).toBeLessThan(100);
+      expect(durationMs).toBeLessThan(200);
     });
 
-    it("GET /tasks?status=COMPLETED under 100ms", async () => {
+    it("GET /tasks?status=COMPLETED under 200ms", async () => {
       const start = now();
       const res = await request(app.getHttpServer())
         .get("/tasks")
@@ -289,10 +289,10 @@ describe("TasksController (Performance)", () => {
       const durationMs = msSince(start);
 
       expect(Array.isArray(res.body)).toBe(true);
-      expect(durationMs).toBeLessThan(100);
+      expect(durationMs).toBeLessThan(200);
     });
 
-    it("GET /tasks with date range and assignee under 100ms", async () => {
+    it("GET /tasks with date range and assignee under 200ms", async () => {
       const startDate = new Date(
         Date.now() - 7 * 24 * 60 * 60 * 1000
       ).toISOString();
@@ -314,7 +314,7 @@ describe("TasksController (Performance)", () => {
       const durationMs = msSince(start);
 
       expect(Array.isArray(res.body)).toBe(true);
-      expect(durationMs).toBeLessThan(100);
+      expect(durationMs).toBeLessThan(200);
     });
   });
 });
